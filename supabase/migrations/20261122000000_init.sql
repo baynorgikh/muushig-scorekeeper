@@ -7,7 +7,7 @@
 -- Helpers
 -- ---------------------------------------------------------------------------
 create or replace function public.set_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql set search_path = public as $$
 begin
   new.updated_at = now();
   return new;
@@ -163,8 +163,8 @@ create index if not exists settlement_payments_game_idx on public.settlement_pay
 -- ---------------------------------------------------------------------------
 create or replace function public.is_game_member(p_game uuid)
 returns boolean language sql stable security definer set search_path = public as $$
-  select exists (select 1 from games g where g.id = p_game and g.host_id = auth.uid())
-      or exists (select 1 from game_members m where m.game_id = p_game and m.user_id = auth.uid());
+  select exists (select 1 from games g where g.id = p_game and g.host_id = (select auth.uid()))
+      or exists (select 1 from game_members m where m.game_id = p_game and m.user_id = (select auth.uid()));
 $$;
 
 -- ---------------------------------------------------------------------------
@@ -184,12 +184,12 @@ alter table public.round_results enable row level security;
 alter table public.settlements enable row level security;
 alter table public.settlement_payments enable row level security;
 
-create policy "profiles: self read" on public.profiles for select using (id = auth.uid());
-create policy "profiles: self update" on public.profiles for update using (id = auth.uid()) with check (id = auth.uid());
+create policy "profiles: self read" on public.profiles for select using (id = (select auth.uid()));
+create policy "profiles: self update" on public.profiles for update using (id = (select auth.uid())) with check (id = (select auth.uid()));
 
-create policy "players: owner read" on public.players for select using (owner_id = auth.uid());
-create policy "players: owner insert" on public.players for insert with check (owner_id = auth.uid());
-create policy "players: owner update" on public.players for update using (owner_id = auth.uid()) with check (owner_id = auth.uid());
+create policy "players: owner read" on public.players for select using (owner_id = (select auth.uid()));
+create policy "players: owner insert" on public.players for insert with check (owner_id = (select auth.uid()));
+create policy "players: owner update" on public.players for update using (owner_id = (select auth.uid())) with check (owner_id = (select auth.uid()));
 
 create policy "games: members read" on public.games for select using (public.is_game_member(id));
 create policy "game_rules: members read" on public.game_rules for select using (public.is_game_member(game_id));
@@ -319,6 +319,8 @@ end $$;
 
 revoke all on function public.sync_game(jsonb) from public, anon;
 revoke all on function public.join_game(text) from public, anon;
+revoke all on function public.is_game_member(uuid) from public, anon;
+revoke all on function public.handle_new_user() from public, anon, authenticated;
 grant execute on function public.sync_game(jsonb) to authenticated;
 grant execute on function public.join_game(text) to authenticated;
 grant execute on function public.is_game_member(uuid) to authenticated;

@@ -96,7 +96,7 @@ supabase/migrations/
 Supabase-гүй бол нэг төхөөрөмжийн горим бүрэн ажиллана; хуваалцах товч дээр тохиргооны заавар харагдана, апп унахгүй.
 
 1. [supabase.com](https://supabase.com) дээр шинэ төсөл үүсгэнэ.
-2. **SQL Editor** нээж `supabase/migrations/20261122000000_init.sql` файлын агуулгыг бүтнээр нь ажиллуулна.
+2. **SQL Editor** нээж `supabase/migrations/` доторх 3 файлыг **дарааллаар нь** (нэрийн дагуу) бүтнээр ажиллуулна.
    (Эсвэл Supabase CLI: `supabase link --project-ref <ref>` → `supabase db push`.)
 3. **Authentication → Sign In / Providers → Anonymous sign-ins**-ийг идэвхжүүлнэ. (Тоглогчид бүртгэл үүсгэлгүйгээр нэгдэнэ.)
 4. **Project Settings → API**-аас `Project URL` ба `anon public` түлхүүрийг авна.
